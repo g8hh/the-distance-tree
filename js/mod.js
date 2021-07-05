@@ -1,11 +1,11 @@
 let modInfo = {
-	name: "The ??? Tree",
-	id: "mymod",
-	author: "nobody",
-	pointsName: "points",
+	name: "The Distance Tree",
+	id: "distance_tree",
+	author: "MrRedShark77",
+	pointsName: "meters",
 	discordName: "",
 	discordLink: "",
-	initialStartPoints: new Decimal (10), // Used for hard resets and new players
+	initialStartPoints: new Decimal (0), // Used for hard resets and new players
 	
 	offlineLimit: 1,  // In hours
 }
@@ -28,7 +28,7 @@ let winText = `Congratulations! You have reached the end and beaten this game, b
 var doNotCallTheseFunctionsEveryTick = ["blowUpEverything"]
 
 function getStartPoints(){
-    return new Decimal(modInfo.initialStartPoints)
+    return D(modInfo.initialStartPoints)
 }
 
 // Determines if it should show points/sec
@@ -39,9 +39,13 @@ function canGenPoints(){
 // Calculate points/sec!
 function getPointGen() {
 	if(!canGenPoints())
-		return new Decimal(0)
+		return D(0)
 
-	let gain = new Decimal(1)
+	let gain = new D(0.1)
+	gain = gain.mul(layers.v.effect())
+	if (hasUpgrade("v", 12)) gain = gain.mul(upgradeEffect('v', 12))
+	if (hasUpgrade("v", 21)) gain = gain.mul(upgradeEffect('v', 21))
+	if (hasUpgrade("v", 23)) gain = gain.pow(1.25)
 	return gain
 }
 
@@ -55,7 +59,7 @@ var displayThings = [
 
 // Determines when the game "ends"
 function isEndgame() {
-	return player.points.gte(new Decimal("e280000000"))
+	return player.points.gte(D(Infinity))
 }
 
 

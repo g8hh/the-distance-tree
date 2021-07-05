@@ -1,3 +1,5 @@
+function D(x) { return new Decimal(x) };
+
 var layoutInfo = {
     startTab: "none",
     startNavTab: "tree-tab",
