@@ -98,7 +98,7 @@ addLayer("v", {
         12: {
             unlocked() { return hasUpgrade(this.layer, 11) },
             title: "Self-Acceleration",
-            description: "Distance boosts himself gain.",
+            description: "Distance boosts itself gain.",
             cost: new Decimal(15),
             effect() {
                 let ret = player.points.add(1).log10()
@@ -144,7 +144,7 @@ addLayer("v", {
         22: {
             unlocked() { return player.a.unlocked && hasUpgrade(this.layer, 21) },
             title: "Self-Velocity",
-            description: "Velocites boosts himself.",
+            description: "Velocites boosts itself.",
             cost: D(10000),
             effect() {
                 let ret = player[this.layer].points.add(1).log10().add(1).root(2)
