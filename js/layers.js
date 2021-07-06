@@ -52,6 +52,7 @@ addLayer("v", {
         let keep = []
         if (rl == 'a' && hasMilestone('a', 0)) keep.push("upgrades")
         if (rl == 'r' && hasMilestone('r', 0)) keep.push("upgrades")
+        if (rl == 'l' && hasMilestone('l', 0)) keep.push("upgrades")
         if (layers[rl].row > this.row) layerDataReset(this.layer, keep)
     },
     gainMult() {
@@ -63,6 +64,7 @@ addLayer("v", {
         if (hasUpgrade('a', 11)) mult = mult.mul(upgradeEffect('a', 11))
         if (hasUpgrade('r', 11)) mult = mult.mul(upgradeEffect('r', 11))
         if (player.r.unlocked) mult = mult.mul(layers.r.effect().mult)
+        if (player.l.unlocked) mult = mult.mul(layers.l.effect().ls_eff)
         if (hasUpgrade('a', 23)) mult = mult.pow(1.15)
         return mult
     },
@@ -85,6 +87,14 @@ addLayer("v", {
     },
     hotkeys: [
         { key: "v", description: "V: Reset for velocites", onPress() { if (canReset(this.layer)) doReset(this.layer) } },
+    ],
+    tabFormat: [
+        "main-display",
+        "blank",
+        "prestige-button",
+        "resource-display",
+        "blank",
+        "upgrades",
     ],
     layerShown() { return true },
     passiveGeneration() { return hasMilestone('a', 1) },
@@ -183,6 +193,7 @@ addLayer("a", {
             unlocked: false,
             points: D(0),
             freeVelocites: D(0),
+            auto: false,
         }
     },
     color: "#F80",
@@ -193,6 +204,11 @@ addLayer("a", {
     type: "static",
     exponent: 1.5,
     base: 2,
+    doReset(rl) {
+        let keep = []
+        if (rl == 'l' && hasMilestone('l', 1)) keep.push("milestones")
+        if (layers[rl].row > this.row) layerDataReset(this.layer, keep)
+    },
     gainMult() {
         mult = D(1)
         if (hasUpgrade(this.layer, 22)) mult = mult.div(upgradeEffect(this.layer, 22))
@@ -218,6 +234,7 @@ addLayer("a", {
     update(diff) {
         if (player[this.layer].unlocked) player[this.layer].freeVelocites = player[this.layer].freeVelocites.add(this.effect().mul(diff))
     },
+    autoPrestige() { return hasMilestone('l',1) && player[this.layer].auto },
     row: 1,
     hotkeys: [
         { key: "a", description: "A: Reset for accelerators", onPress() { if (canReset(this.layer)) doReset(this.layer) } },
@@ -255,8 +272,13 @@ addLayer("a", {
         },
         3: {
             requirementDescription: "12 accelerators",
-            effectDescription: "Unlock new layer in 2nd row.",
+            effectDescription: "Unlock Rocket.",
             done() { return player[this.layer].points.gte(12) }
+        },
+        4: {
+            requirementDescription: "42 accelerators",
+            effectDescription: "Unlock Light.",
+            done() { return player[this.layer].points.gte(42) }
         },
     },
     upgrades: {
@@ -266,7 +288,7 @@ addLayer("a", {
             description: "Accelerators boosts velocity gain.",
             cost: new Decimal(3),
             effect() {
-                let ret = player[this.layer].points.add(1).root(2)
+                let ret = player[this.layer].points.add(1).root(2).add(1)
                 return ret;
             },
             effectDisplay() { return format(this.effect()) + "x" },
@@ -317,6 +339,7 @@ addLayer("a", {
             cost: new Decimal(24),
             effect() {
                 let ret = player[this.layer].freeVelocites.add(1).root(15)
+                if (hasUpgrade('l', 14)) ret = ret.pow(upgradeEffect('l', 14))
                 return ret;
             },
             effectDisplay() { return "/"+format(this.effect()) },
@@ -341,7 +364,7 @@ addLayer("r", {
     symbol: "R",
     position: 1,
     startData() { return {
-        unlocked: true,
+        unlocked: false,
 		points: D(0),
     }},
     color: "#FF4816",
@@ -356,6 +379,7 @@ addLayer("r", {
         if (hasUpgrade('a', 21)) mult = mult.mul(upgradeEffect('a', 21))
         if (hasUpgrade(this.layer, 14)) mult = mult.mul(upgradeEffect(this.layer, 14))
         if (hasAchievement('ach', 24)) mult = mult.mul(2)
+        if (player.l.unlocked) mult = mult.mul(layers.l.effect().ls_eff)
         return mult
     },
     gainExp() {
@@ -365,6 +389,7 @@ addLayer("r", {
         let ret = {}
         let soft = D(2)
         if (hasUpgrade('a', 24)) soft = soft.add(1)
+        if (hasUpgrade('l', 13)) soft = soft.add(upgradeEffect('l', 13))
         ret.pow = player[this.layer].points.add(1).log10().div(2)
         if (ret.pow.gte(soft)) ret.pow = ret.pow.div(soft).cbrt().mul(soft)
         ret.mult = player.v.points.max(1).log10().add(1).pow(ret.pow)
@@ -416,7 +441,7 @@ addLayer("r", {
             effectDisplay() { return format(this.effect()) + "x" },
         },
         12: {
-            unlocked() { return player[this.layer].unlocked },
+            unlocked() { return hasUpgrade(this.layer,11) },
             title: "Bouns Acceleration",
             description: "Rockets adds accelerators to him effect.",
             cost: new Decimal(3000),
@@ -427,7 +452,7 @@ addLayer("r", {
             effectDisplay() { return "+"+format(this.effect()) },
         },
         13: {
-            unlocked() { return player[this.layer].unlocked },
+            unlocked() { return hasUpgrade(this.layer,12) },
             title: "True Speed",
             description: "Free velocites from accelerator boosts velocity effect.",
             cost: new Decimal(27000),
@@ -438,7 +463,7 @@ addLayer("r", {
             effectDisplay() { return format(this.effect()) + "x" },
         },
         14: {
-            unlocked() { return player[this.layer].unlocked },
+            unlocked() { return hasUpgrade(this.layer,13) },
             title: "Semi-Rocket",
             description: 'Distance boosts rocket gain.',
             cost: new Decimal(2.5e7),
@@ -447,6 +472,139 @@ addLayer("r", {
                 return ret;
             },
             effectDisplay() { return format(this.effect()) + "x" },
+        },
+    },
+})
+
+addLayer("l", {
+    name: "light",
+    symbol: "L",
+    position: 0,
+    startData() { return {
+        unlocked: false,
+		points: D(0),
+        ls: D(0),
+    }},
+    color: "#FF0",
+    requires: D(1e15),
+    resource: "lights",
+    baseResource: "rockets",
+    baseAmount() {return player.r.points},
+    type: "static",
+    exponent: 1.5,
+    base: 10,
+    gainMult() {
+        mult = D(1)
+        return mult
+    },
+    gainExp() {
+        return D(1)
+    },
+    effect() {
+        let ret = {}
+
+        let ls_gain = D(2).pow(player[this.layer].points).sub(1)
+        if (hasAchievement('ach', 27)) ls_gain = ls_gain.mul(2)
+        if (hasUpgrade(this.layer, 11)) ls_gain = ls_gain.mul(upgradeEffect(this.layer, 11))
+
+        ret.gen = ls_gain
+        ret.ls_eff = player[this.layer].ls.add(1).log10().add(1)
+
+        return ret
+    },
+    effectDescription() {
+        let eff = this.effect();
+        return "which generates "+format(eff.gen)+" lights speed each second."
+    },
+    update(diff) {
+        if (player[this.layer].unlocked) player[this.layer].ls = player[this.layer].ls.add(this.effect().gen.mul(diff))
+    },
+    branches: ['a','r'],
+    row: 2,
+    hotkeys: [
+        {key: "p", description: "P: Reset for prestige points", onPress(){if (canReset(this.layer)) doReset(this.layer)}},
+    ],
+    tabFormat: [
+        "main-display",
+        ["display-text", function () { return `You have `+layerText('h2','l',format(player.l.ls))+' lights speed, which boosts velocity & rocket gain by '+format(layers.l.effect().ls_eff)+"x" }],
+        "blank",
+        "prestige-button",
+        "resource-display",
+        "blank",
+        "milestones",
+        "blank",
+        "upgrades",
+    ],
+    layerShown(){return hasMilestone('a', 4) || player[this.layer].unlocked},
+    milestones: {
+        0: {
+            requirementDescription: "3 lights",
+            effectDescription: "Keep velocity upgrades on reset.",
+            done() { return player[this.layer].points.gte(3) }
+        },
+        1: {
+            requirementDescription: "4 lights",
+            effectDescription: "Keep accelerator milestones on reset. Unlock Auto-Accelerators.",
+            done() { return player[this.layer].points.gte(4) },
+            toggles: [["a", "auto"]],
+        },
+    },
+    upgrades: {
+        11: {
+            unlocked() { return player[this.layer].unlocked },
+            title: "Bright",
+            description: "Accelerators boost light speed gain.",
+            cost: new Decimal(500),
+            currencyInternalName: "ls",
+            currencyDisplayName: "lights speed",
+            currencyLayer: "l",
+            effect() {
+                let ret = player.a.points.add(1).pow(1.5)
+                return ret;
+            },
+            effectDisplay() { return format(this.effect()) + "x" },
+        },
+        12: {
+            unlocked() { return hasUpgrade('l',11) },
+            title: "Light Year",
+            description: "Lights speed boosts distance gain.",
+            cost: new Decimal(2500),
+            currencyInternalName: "ls",
+            currencyDisplayName: "lights speed",
+            currencyLayer: "l",
+            effect() {
+                let ret = player[this.layer].ls.add(1).root(2)
+                return ret;
+            },
+            effectDisplay() { return format(this.effect()) + "x" },
+        },
+        13: {
+            unlocked() { return hasUpgrade('l',12) },
+            title: "Drop Softcap",
+            description: "Light speed makes rocket effect power softcap starts later.",
+            cost: new Decimal(500000),
+            currencyInternalName: "ls",
+            currencyDisplayName: "lights speed",
+            currencyLayer: "l",
+            effect() {
+                let ret = player[this.layer].ls.add(1).log10().div(8)
+                return ret;
+            },
+            effectDisplay() { return "+"+format(this.effect())+" later" },
+        },
+        14: {
+            unlocked() { return hasUpgrade('l',13) },
+            title: "Even Cheaper",
+            description: `Make "Ex-Accelerator" is stronger based on rockets.`,
+            cost: new Decimal(2500000),
+            currencyInternalName: "ls",
+            currencyDisplayName: "lights speed",
+            currencyLayer: "l",
+            effect() {
+                let ret = player.r.points.add(1).log10().div(50).add(1)
+                return ret;
+            },
+            effectDisplay() { return "^"+format(this.effect()) },
         },
     },
 })
@@ -543,6 +701,18 @@ addLayer("ach", {
             name: "Nice...",
             done() { return player.points.gte(4.2e69) },
             tooltip: "Reach at least 4.20e69 meters.",
+            onComplete() { player[this.layer].points = player[this.layer].points.add(1) }
+        },
+        26: {
+            name: "Too light...",
+            done() { return player.l.points.gte(1) },
+            tooltip: "Get lights.",
+            onComplete() { player[this.layer].points = player[this.layer].points.add(1) }
+        },
+        27: {
+            name: "Googol Meter",
+            done() { return player.points.gte(1e100) },
+            tooltip: "Reach at least 1e100 meters. Reward: Double light speed gain.",
             onComplete() { player[this.layer].points = player[this.layer].points.add(1) }
         },
     },

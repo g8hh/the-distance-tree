@@ -12,14 +12,18 @@ let modInfo = {
 
 // Set your version in num and name
 let VERSION = {
-	num: "0.1",
-	name: "Rocket Update",
+	num: "0.2",
+	name: "Light Update",
 }
 
 let changelog = `<h1>Changelog:</h1><br>
+<br><h3>v0.2 - Light Update</h3><br>
+		- Added Light.<br>
+		- Balanced to 1e120 m, 5 lights.<br>
+		- Fixed, and more...<br>
 <br><h3>v0.1 - Rocket Update</h3><br>
 		- Added Rocket.<br>
-		- Balanced to 1e100 m, 42 accelerators.
+		- Balanced to 1e100 m, 42 accelerators.<br>
 <br><h3>v0.0</h3><br>
 		- Added things.<br>
 		- Added stuff.`
@@ -48,6 +52,7 @@ function getPointGen() {
 	gain = gain.mul(layers.v.effect())
 	if (hasUpgrade("v", 12)) gain = gain.mul(upgradeEffect('v', 12))
 	if (hasUpgrade("v", 21)) gain = gain.mul(upgradeEffect('v', 21))
+	if (hasUpgrade("l", 12)) gain = gain.mul(upgradeEffect('l', 12))
 	if (hasUpgrade("v", 23)) gain = gain.pow(1.25)
 	return gain
 }
