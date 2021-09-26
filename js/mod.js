@@ -1,5 +1,5 @@
 let modInfo = {
-	name: "The Distance Tree",
+	name: "距离树 - The Distance Tree",
 	id: "distance_tree",
 	author: "MrRedShark77",
 	pointsName: "meters",
