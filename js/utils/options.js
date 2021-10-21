@@ -6,13 +6,14 @@ function getStartOptions() {
 	return {
 		autosave: true,
 		msDisplay: "always",
-		theme: null,
+		theme: "default",
 		hqTree: false,
 		offlineProd: true,
 		hideChallenges: false,
 		showStory: true,
 		forceOneTab: false,
 		oldStyle: false,
+		tooltipForcing: true,
 	}
 }
 
@@ -41,7 +42,7 @@ function changeTreeQuality() {
 	document.body.style.setProperty('--hqProperty3', on ? "2px 2px 4px rgba(0, 0, 0, 0.25)" : "none");
 }
 function toggleAuto(toggle) {
-	player[toggle[0]][toggle[1]] = !player[toggle[0]][toggle[1]];
+	Vue.set(player[toggle[0]], [toggle[1]], !player[toggle[0]][toggle[1]]);
 	needCanvasUpdate=true
 }
 

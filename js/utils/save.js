@@ -1,7 +1,7 @@
 // ************ Save stuff ************
-function save() {
+function save(force) {
 	NaNcheck(player)
-	if (NaNalert) return
+	if (NaNalert && !force) return
 	localStorage.setItem(modInfo.id, btoa(unescape(encodeURIComponent(JSON.stringify(player)))));
 	localStorage.setItem(modInfo.id+"_options", btoa(unescape(encodeURIComponent(JSON.stringify(options)))));
 
@@ -197,7 +197,7 @@ function load() {
 		loadOptions();
 	}
 
-	if (player.offlineProd) {
+	if (options.offlineProd) {
 		if (player.offTime === undefined)
 			player.offTime = { remain: 0 };
 		player.offTime.remain += (Date.now() - player.time) / 1000;
@@ -222,7 +222,8 @@ function loadOptions() {
 		options = Object.assign(getStartOptions(), JSON.parse(decodeURIComponent(escape(atob(get2)))));
 	else 
 		options = getStartOptions()
-	
+	if (themes.indexOf(options.theme) < 0) theme = "default"
+	fixData(options, getStartOptions())
 
 }
 
@@ -243,13 +244,13 @@ function NaNcheck(data) {
 		}
 		else if (data[item] !== data[item] || checkDecimalNaN(data[item])) {
 			if (!NaNalert) {
-				confirm("Invalid value found in player, named '" + item + "'. Please let the creator of this mod know! You can refresh the page, and you will be un-NaNed.")
 				clearInterval(interval);
 				NaNalert = true;
+				alert("Invalid value found in player, named '" + item + "'. Please let the creator of this mod know! You can refresh the page, and you will be un-NaNed.")
 				return
 			}
 		}
-		else if (data[item] instanceof Decimal) { // Convert to Decimal
+		else if (data[item] instanceof Decimal) {
 		}
 		else if ((!!data[item]) && (data[item].constructor === Object)) {
 			NaNcheck(data[item]);
@@ -257,7 +258,7 @@ function NaNcheck(data) {
 	}
 }
 function exportSave() {
-	if (NaNalert) return
+	//if (NaNalert) return
 	let str = btoa(JSON.stringify(player));
 
 	const el = document.createElement("textarea");
@@ -279,6 +280,7 @@ function importSave(imported = undefined, forced = false) {
 		player.versionType = modInfo.id;
 		fixSave();
 		versionCheck();
+		NaNcheck(save)
 		save();
 		window.location.reload();
 	} catch (e) {
@@ -314,8 +316,14 @@ function versionCheck() {
 var saveInterval = setInterval(function () {
 	if (player === undefined)
 		return;
-	if (gameEnded && !player.keepGoing)
+	if (tmp.gameEnded && !player.keepGoing)
 		return;
 	if (options.autosave)
 		save();
 }, 5000);
+
+window.onbeforeunload = () => {
+    if (player.autosave) {
+        save();
+    }
+};

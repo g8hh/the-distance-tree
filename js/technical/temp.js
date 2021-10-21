@@ -25,8 +25,10 @@ var traversableClasses = []
 function setupTemp() {
 	tmp = {}
 	tmp.pointGen = {}
+	tmp.backgroundStyle = {}
 	tmp.displayThings = []
 	tmp.scrolled = 0
+	tmp.gameEnded = false
 	funcs = {}
 	
 	setupTempData(layers, tmp, funcs)
@@ -54,6 +56,8 @@ function setupTemp() {
 	temp = tmp
 }
 
+const boolNames = ["unlocked", "deactivated"]
+
 function setupTempData(layerData, tmpData, funcsData) {
 	for (item in layerData){
 		if (layerData[item] == null) {
@@ -77,7 +81,10 @@ function setupTempData(layerData, tmpData, funcsData) {
 		}
 		else if (isFunction(layerData[item]) && !activeFunctions.includes(item)){
 			funcsData[item] = layerData[item]
-			tmpData[item] = decimalOne // The safest thing to put probably?
+			if (boolNames.includes(item))
+				tmpData[item] = false
+			else
+				tmpData[item] = decimalOne // The safest thing to put probably?
 		} else {
 			tmpData[item] = layerData[item]
 		}
@@ -99,10 +106,13 @@ function updateTemp() {
 		tmp[layer].trueGlowColor = tmp[layer].glowColor
 		tmp[layer].notify = shouldNotify(layer)
 		tmp[layer].prestigeNotify = prestigeNotify(layer)
+		if (tmp[layer].passiveGeneration === true) tmp[layer].passiveGeneration = 1 // new Decimal(true) = decimalZero
 
 	}
 
 	tmp.pointGen = getPointGen()
+	tmp.backgroundStyle = readData(backgroundStyle)
+
 	tmp.displayThings = []
 	for (thing in displayThings){
 		let text = displayThings[thing]
