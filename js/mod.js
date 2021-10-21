@@ -1,30 +1,24 @@
 let modInfo = {
-	name: "The Distance Tree",
-	id: "distance_tree",
-	author: "MrRedShark77",
-	pointsName: "meters",
+	name: "The ??? Tree",
+	id: "mymod",
+	author: "nobody",
+	pointsName: "points",
+	modFiles: ["layers.js", "tree.js"],
+
 	discordName: "",
 	discordLink: "",
-	initialStartPoints: new Decimal (0), // Used for hard resets and new players
-	
+	initialStartPoints: new Decimal (10), // Used for hard resets and new players
 	offlineLimit: 1,  // In hours
 }
 
 // Set your version in num and name
 let VERSION = {
-	num: "0.2",
-	name: "Light Update",
+	num: "0.0",
+	name: "Literally nothing",
 }
 
 let changelog = `<h1>Changelog:</h1><br>
-<br><h3>v0.2 - Light Update</h3><br>
-		- Added Light.<br>
-		- Balanced to 1e120 m, 5 lights.<br>
-		- Fixed, and more...<br>
-<br><h3>v0.1 - Rocket Update</h3><br>
-		- Added Rocket.<br>
-		- Balanced to 1e100 m, 42 accelerators.<br>
-<br><h3>v0.0</h3><br>
+	<h3>v0.0</h3><br>
 		- Added things.<br>
 		- Added stuff.`
 
@@ -35,7 +29,7 @@ let winText = `Congratulations! You have reached the end and beaten this game, b
 var doNotCallTheseFunctionsEveryTick = ["blowUpEverything"]
 
 function getStartPoints(){
-    return D(modInfo.initialStartPoints)
+    return new Decimal(modInfo.initialStartPoints)
 }
 
 // Determines if it should show points/sec
@@ -46,14 +40,9 @@ function canGenPoints(){
 // Calculate points/sec!
 function getPointGen() {
 	if(!canGenPoints())
-		return D(0)
+		return new Decimal(0)
 
-	let gain = new D(0.1)
-	gain = gain.mul(layers.v.effect())
-	if (hasUpgrade("v", 12)) gain = gain.mul(upgradeEffect('v', 12))
-	if (hasUpgrade("v", 21)) gain = gain.mul(upgradeEffect('v', 21))
-	if (hasUpgrade("l", 12)) gain = gain.mul(upgradeEffect('l', 12))
-	if (hasUpgrade("v", 23)) gain = gain.pow(1.25)
+	let gain = new Decimal(1)
 	return gain
 }
 
@@ -67,12 +56,17 @@ var displayThings = [
 
 // Determines when the game "ends"
 function isEndgame() {
-	return player.points.gte(D(Infinity))
+	return player.points.gte(new Decimal("e280000000"))
 }
 
 
 
 // Less important things beyond this point!
+
+// Style for the background, can be a function
+var backgroundStyle = {
+
+}
 
 // You can change this if you have things that can be messed up by long tick lengths
 function maxTickLength() {
