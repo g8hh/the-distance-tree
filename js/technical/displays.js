@@ -64,7 +64,7 @@ function updateWidth() {
 function updateOomps(diff)
 {
 	tmp.other.oompsMag = 0
-	if (player.points.lte(new Decimal(1e100))) return
+	if (player.points.lte(new Decimal(1e100)) || diff == 0) return
 
 	var pp = new Decimal(player.points);
 	var lp = tmp.other.lastPoints || new Decimal(0);
@@ -115,6 +115,10 @@ function constructBarStyle(layer, id) {
 			break;
 		case DEFAULT:
 			style.fillDims['clip-path'] = 'inset(0% 50% 0% 0%)'
+	}
+
+	if (bar.instant) {
+		style.fillDims['transition-duration'] = '0s'
 	}
 	return style
 }
