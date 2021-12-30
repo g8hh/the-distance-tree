@@ -75,7 +75,7 @@ var cnItems = {
     "Faster Speed": "更快的速度",
     "Self-Velocity": "自速度",
     "Velocites boosts itself.": "速度提升自身。",
-    "": "",
+    "Achievement Gotten!": "获得成就！",
     "": "",
     "": "",
     "": "",
